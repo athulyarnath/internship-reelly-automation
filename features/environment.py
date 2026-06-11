@@ -5,13 +5,41 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.options import Options
 
-
 from app.application import Application
 
+BROWSERSTACK_USERNAME = "*****************"
+BROWSERSTACK_ACCESS_KEY = "*****************"
 
 def browser_init(context):
     #init_chrome(context)
-    init_firefox(context)
+    #init_firefox(context)
+    init_browserstack(context)
+
+def init_browserstack(context):
+    options = Options()
+    bstack_configs = {
+        "userName": BROWSERSTACK_USERNAME,
+        "accessKey": BROWSERSTACK_ACCESS_KEY,
+        "browserName": "Firefox",
+        "os": "Windows",
+        "osVersion": "11",
+        "projectName": "QAAR-1339",
+        "buildName": "v1.0",
+        "sessionName": "Integrate your tests with a Cloud Testing Platform",
+        "seleniumVersion": "4.0.0",
+        "debug": "true"
+    }
+    options.set_capability('bstack:options', bstack_configs)
+    bstack_hub_url = f"https://hub-cloud.browserstack.com/wd/hub"
+
+    context.driver = webdriver.Remote(command_executor=bstack_hub_url, options=options)
+
+    context.driver.set_window_size(1920, 1080)
+    context.driver.implicitly_wait(5)
+    context.wait = WebDriverWait(context.driver, timeout=20)
+
+    context.app = Application(context.driver)
+    print('Webdriver [BrowserStack] initialized')
 
 def init_firefox(context):
     firefox_options = Options()
