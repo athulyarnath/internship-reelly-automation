@@ -2,24 +2,44 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
+
 
 from app.application import Application
 
 
 def browser_init(context):
-    """
-    :param context: Behave context
-    """
-    driver_path = ChromeDriverManager().install()
-    service = Service(driver_path)
-    context.driver = webdriver.Chrome(service=service)
+    #init_chrome(context)
+    init_firefox(context)
 
-    context.driver.maximize_window()
+def init_firefox(context):
+    firefox_options = Options()
+    firefox_options.add_argument("-headless")
+    context.driver = webdriver.Firefox(options=firefox_options)
+
+    context.driver.set_window_size(1920, 1080)
     context.driver.implicitly_wait(5)
     context.wait = WebDriverWait(context.driver, timeout=20)
 
     context.app = Application(context.driver)
-    print('Webdriver initialized')
+    print('Webdriver [Firefox] initialized')
+
+
+def init_chrome(context):
+    chrome_options = Options()
+    chrome_options.add_argument('--headless=new')
+
+    driver_path = ChromeDriverManager().install()
+    service = Service(driver_path)
+    context.driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    context.driver.set_window_size(1920, 1080)
+    context.driver.implicitly_wait(5)
+    context.wait = WebDriverWait(context.driver, timeout=20)
+
+    context.app = Application(context.driver)
+    print('Webdriver [Chrome] initialized')
 
 
 def before_scenario(context, scenario):
