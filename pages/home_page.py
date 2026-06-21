@@ -1,6 +1,7 @@
 from time import sleep
 
 from selenium.webdriver.common.by import By
+from appium.webdriver.common.appiumby import AppiumBy
 
 from pages.base_page import BasePage
 
@@ -13,9 +14,16 @@ class HomePage(BasePage):
     TAB_OFFERS = (By.CSS_SELECTOR, 'div[class="w-layout-grid new-market-offers-grid"]')
     TAG_AGENTS = (By.CSS_SELECTOR, 'div[w-el-text="For agency"]')
 
+    DEVICE = BasePage.DEVICE
+
     def click_on_market_menu(self):
-        self.click(*self.BTN_MARKET)
-        sleep(5)
+        if self.DEVICE == "Mobile":
+            self.driver.find_element(AppiumBy.XPATH, '//android.widget.EditText[@resource-id="email-2"]').send_keys(self.USERNAME_VAL)
+            self.driver.find_element(AppiumBy.XPATH, '//android.widget.EditText[@resource-id="field"]').send_keys(self.PASSWORD_VAL)
+            self.driver.find_element(AppiumBy.XPATH, '//android.view.View[@content-desc="Continue"]').click()
+        else:
+            self.click(*self.BTN_MARKET)
+        sleep(1)
 
     def verify_right_page(self):
         dheader = self.find_element(*self.DIV_HEADER)

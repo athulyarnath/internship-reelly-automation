@@ -4,6 +4,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.options import Options
+from appium import webdriver
+from appium.options.android import UiAutomator2Options
 
 from app.application import Application
 
@@ -11,9 +13,30 @@ BROWSERSTACK_USERNAME = "*****************"
 BROWSERSTACK_ACCESS_KEY = "*****************"
 
 def browser_init(context):
+    init_mobile_chrome_simulator(context)
     #init_chrome(context)
     #init_firefox(context)
-    init_browserstack(context)
+    #init_browserstack(context)
+
+def init_mobile_chrome_simulator(context):
+    desired_capabilities = {
+        'platformName': 'Android',
+        'automationName': 'UiAutomator2',
+        'version': '7.6.1',
+        'deviceName': 'Android Emulator'
+    }
+    appium_server_url = "http://127.0.0.1:4723"
+    capabilities_options = (UiAutomator2Options()
+                            .load_capabilities(desired_capabilities))
+    context.driver = webdriver.Remote(appium_server_url, options=capabilities_options)
+
+
+    context.driver.implicitly_wait(5)
+    context.wait = WebDriverWait(context.driver, timeout=20)
+    context.DEVICE = "Mobile"
+
+    context.app = Application(context)
+    print('Webdriver - Mobile [Chrome] initialized')
 
 def init_browserstack(context):
     options = Options()
@@ -56,11 +79,12 @@ def init_firefox(context):
 
 def init_chrome(context):
     chrome_options = Options()
-    chrome_options.add_argument('--headless=new')
+    #chrome_options.add_argument('--headless=new')
 
     driver_path = ChromeDriverManager().install()
     service = Service(driver_path)
-    context.driver = webdriver.Chrome(service=service, options=chrome_options)
+#    context.driver = webdriver.Chrome(service=service, options=chrome_options)
+    context.driver = webdriver.Chrome(service=service)
 
     context.driver.set_window_size(1920, 1080)
     context.driver.implicitly_wait(5)
